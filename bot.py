@@ -12,20 +12,18 @@ steam_api_url = 'https://api.steampowered.com/ISteamNews/GetNewsForApp/v0002/'
 steam_app_id = '892970'
 
 load_dotenv()
-client = commands.Bot(command_prefix = '!') # What the bot listens for in discord to calls it's functionality.
+TOKEN = os.getenv('DISCORD_TOKEN')
+
+intents = discord.Intents.default()
+intents.message_content = True
+client = discord.Client(intents=intents) 
 
 @client.event
 async def on_ready():
-    print('bot is ready!')
-
-@client.command()
-async def update_discord(ctx):
-    await ctx.send("Here is the latest update" + )
-
-
+    print(f'Logged on as {client.user}!')
 
 previous_update = []
-
+client.event
 def fetch_valheim_update():
     url = 'https://api.steampowered.com/ISteamNews/GetNewsForApp/v0002/?appid=892970&count=1&maxlength=20000&format=json'
     response = requests.get(url)
@@ -49,12 +47,28 @@ async def check_for_new_update(previous_update):
         else:
             print('No previous update available.')
 
-async def main():
-    while True:
-        await check_for_new_update(previous_update)
-        await asyncio.sleep(3600)
+@client.event
+async def on_message(message):
+    if message.content == "Update":
+        result = fetch_valheim_update()
+        print("Length of result:" , len(result))
+        if len(result) > 1067:
+            chunks = [result[i:i+1067] for i in range(0, len(result), 1067)]
+            for chunk in chunks:
+                await message.channel.send(chunk)
+        await message.channel.send("Here is the latest update" + result)
 
-asyncio.run(main())
+
+print(len(result))
+
+# async def main():
+#     while True:
+#         await check_for_new_update(previous_update)
+#         await asyncio.sleep(3600)
+
+# asyncio.run(main())
+
+client.run(TOKEN)
 
 
 

@@ -1,22 +1,32 @@
+# bot.py
+import os
+
 import discord
+from dotenv import load_dotenv
 
-class MyClient(discord.Client):
-    async def on_ready(self):
-        print(f'Logged on as {self.user}!')
+load_dotenv()
+TOKEN = os.getenv('DISCORD_TOKEN')
 
-    async def on_message(self, message):
-        print(f'Message from {message.author}: {message.content}')
 
-        if message.author == self.user:
-            return
-        
-        if message.content.startswith('!hello'):
-            await message.channel.send('Hello!')
-            
 intents = discord.Intents.default()
 intents.message_content = True
+client = discord.Client(intents=intents)
 
 
 
-client = MyClient(intents=intents)
-client.run('TOKEN')
+@client.event
+async def on_ready():
+        print(f'Logged on as {client.user}!')
+
+@client.event
+async def on_message(message):
+    print(f'Message from {message.author}: {message.content}')
+
+    if message.author == client.user:
+        return
+    
+    if message.content == 'Hello':
+        await message.channel.send('Hello')
+
+
+client.run(TOKEN)
